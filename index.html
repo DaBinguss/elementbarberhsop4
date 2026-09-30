@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>מספרת אלמנט | התספורת שלך, הסטייל שלך</title>
+  <meta name="description" content="מספרת אלמנט - חוויית תספורת וטיפוח לגבר ברמה הגבוהה ביותר. יוסי בנאי 44.">
+  
+  <!-- Google Fonts: Heebo & Montserrat -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Top Scroll Progress Indicator -->
+  <div class="scroll-progress-bar" id="scrollProgressBar"></div>
+
+  <!-- Top Notification Bar during Edit Mode -->
+  <div class="edit-top-banner" id="editTopBanner">
+    <div class="container edit-banner-container">
+      <div class="edit-banner-info">
+        <i data-lucide="sparkles" class="banner-icon"></i>
+        <span><strong>מצב עריכה ומחיקה מורחב:</strong> לחץ על טקסט לעריכה • לחץ על <strong>"🧹 כלי מחק"</strong> כדי למחוק כל דבר שתלחץ עליו • לחץ על <strong>"נקה הכל"</strong> למחיקת כל הדף!</span>
+      </div>
+      <div class="edit-banner-actions">
+        <button class="banner-btn move-action-btn" id="bannerMoveBtn" title="כלי הזזה: לחץ וגרור כל אלמנט באתר או השתמש בחיצים">
+          <i data-lucide="move"></i>
+          <span id="bannerMoveText">כלי הזזה</span>
+        </button>
+        <button class="banner-btn eraser-action-btn" id="bannerEraserBtn" title="הפעל כלי מחק: לחץ על כל אלמנט באתר כדי למחוק אותו מיד">
+          <i data-lucide="eraser"></i>
+          <span id="bannerEraserText">כלי מחק</span>
+        </button>
+        <button class="banner-btn clear-all-action-btn" id="bannerClearAllBtn" title="מחק את כל המקטעים והתוכן מהעמוד בבת אחת">
+          <i data-lucide="trash-2"></i>
+          <span>מחק הכל</span>
+        </button>
+        <button class="banner-btn restore-action-btn" id="bannerRestoreBtn" title="שחזר פריטים שנמחקו" style="display: none;">
+          <i data-lucide="archive-restore"></i>
+          <span id="bannerRestoreText">סל שחזור (0)</span>
+        </button>
+        <button class="banner-btn save-action-btn" id="bannerSaveBtn" title="שמור שינויים בדפדפן">
+          <i data-lucide="save"></i>
+          <span>שמור</span>
+        </button>
+        <button class="banner-btn close-action-btn" id="bannerCloseBtn" title="צא ממצב עריכה">
+          <i data-lucide="check"></i>
+          <span>סיום</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right-Click Universal Context Menu for any element -->
+  <div id="universalContextMenu" class="custom-context-menu" style="display: none;">
+    <button type="button" class="ctx-item ctx-delete" id="ctxDeleteBtn">
+      <i data-lucide="trash-2"></i>
+      <span>מחק אלמנט זה</span>
+    </button>
+    <button type="button" class="ctx-item" id="ctxMovePrevBtn">
+      <i data-lucide="arrow-right"></i>
+      <span>הזז קדימה / למעלה</span>
+    </button>
+    <button type="button" class="ctx-item" id="ctxMoveNextBtn">
+      <i data-lucide="arrow-left"></i>
+      <span>הזז אחורה / למטה</span>
+    </button>
+  </div>
+
+  <!-- Floating Eraser Cursor Badge -->
+  <div id="eraserCursorBadge" class="eraser-cursor-badge" style="display: none;">
+    <i data-lucide="trash-2"></i>
+    <span>לחץ למחיקה</span>
+  </div>
+
+  <!-- Floating Mini Rich-Text Formatting & Delete Bubble -->
+  <div id="textFormatBubble" class="text-format-bubble" style="display: none;">
+    <button type="button" class="format-btn" data-cmd="bold" title="מודגש (Bold)"><b>B</b></button>
+    <button type="button" class="format-btn" data-cmd="italic" title="נטוי (Italic)"><i>I</i></button>
+    <button type="button" class="format-btn" data-cmd="underline" title="קו תחתון (Underline)"><u>U</u></button>
+    <span class="bubble-sep"></span>
+    <button type="button" class="color-btn color-white" data-cmd="color" data-color="#ffffff" title="צבע לבן"></button>
+    <button type="button" class="color-btn color-lightgray" data-cmd="color" data-color="#e4e4e7" title="צבע אפור בהיר"></button>
+    <button type="button" class="color-btn color-gold" data-cmd="color" data-color="#f59e0b" title="צבע זהב"></button>
+    <span class="bubble-sep"></span>
+    <button type="button" class="format-btn" data-cmd="removeFormat" title="נקה עיצוב">
+      <i data-lucide="eraser"></i>
+    </button>
+    <button type="button" class="format-btn delete-btn-accent" data-cmd="deleteActiveElement" title="מחק אלמנט זה מהאתר">
+      <i data-lucide="trash-2"></i>
+    </button>
+  </div>
+
+  <!-- Navigation Header -->
+  <header class="site-header" id="siteHeader">
+    <div class="container header-container">
+      <a href="#hero" class="brand-group">
+        <div class="logo-box placeholder-box" id="headerLogo" data-editable-image="header_logo" title="לחץ להעלאת לוגו">
+          <div class="logo-placeholder-content">
+            <i data-lucide="scissors" class="logo-default-icon"></i>
+            <span class="placeholder-tag">[לוגו]</span>
+          </div>
+          <img src="" alt="לוגו מספרת אלמנט" class="uploaded-img" style="display: none;">
+          <button type="button" class="btn-remove-image" data-remove-image="header_logo" title="הסר לוגו">
+            <i data-lucide="x"></i>
+          </button>
+        </div>
+        <div class="brand-text">
+          <span class="brand-name" data-edit-key="brand_name">מספרת אלמנט</span>
+          <span class="brand-tagline" data-edit-key="brand_tagline">התספורת שלך, הסטייל שלך</span>
+        </div>
+      </a>
+
+      <!-- Desktop Nav -->
+      <nav class="desktop-nav">
+        <ul class="nav-links">
+          <li><a href="#hero" class="nav-link active">בית</a></li>
+          <li><a href="#services" class="nav-link">שירותים ומחירים</a></li>
+          <li><a href="#team" class="nav-link">הצוות שלנו</a></li>
+          <li><a href="#location" class="nav-link">מיקום ושעות</a></li>
+        </ul>
+      </nav>
+
+      <div class="header-cta">
+        <a href="https://app.boka.co.il/join/kRnQ12Otkly9xEIthPmL" target="_blank" rel="noopener noreferrer" class="btn btn-primary open-booking-btn">
+          <i data-lucide="calendar"></i>
+          <span>לקביעת תורים</span>
+        </a>
+        <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="פתח תפריט">
+          <i data-lucide="menu" id="menuIcon"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Drawer Nav -->
+    <div class="mobile-nav-drawer" id="mobileDrawer">
+      <ul class="mobile-nav-links">
+        <li><a href="#hero" class="mobile-nav-link">בית</a></li>
+        <li><a href="#services" class="mobile-nav-link">שירותים ומחירים</a></li>
+        <li><a href="#team" class="mobile-nav-link">הצוות שלנו</a></li>
+        <li><a href="#location" class="mobile-nav-link">מיקום ושעות</a></li>
+      </ul>
+      <div class="mobile-drawer-cta">
+        <a href="https://app.boka.co.il/join/kRnQ12Otkly9xEIthPmL" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-block open-booking-btn">
+          <i data-lucide="calendar"></i>
+          <span>לקביעת תורים</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content: All Draggable & Deletable Sections inside #mainContent -->
+  <main id="mainContent">
+
+    <!-- Hero Section -->
+    <section class="hero-section draggable-section" id="hero" data-section-id="hero" data-section-title="דף הבית (Hero)">
+      
+      <!-- Section Controls (Visible in Edit Mode) -->
+      <div class="edit-section-bar">
+        <div class="section-drag-handle" title="גרור כדי להזיז מקטע">
+          <i data-lucide="grip-vertical"></i>
+          <span class="section-badge-name">מקטע ראשי (Hero)</span>
+        </div>
+        <div class="section-move-btns">
+          <button type="button" class="btn-sec-move" data-move-sec="up" title="הזז מקטע זה למעלה">
+            <i data-lucide="arrow-up"></i>
+            <span>למעלה</span>
+          </button>
+          <button type="button" class="btn-sec-move" data-move-sec="down" title="הזז מקטע זה למטה">
+            <i data-lucide="arrow-down"></i>
+            <span>למטה</span>
+          </button>
+          <button type="button" class="btn-sec-delete" title="מחק מקטע ראשי זה">
+            <i data-lucide="trash-2"></i>
+            <span>מחק מקטע</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="hero-background-pattern"></div>
+      <!-- עמוד עליון: צבע לבן מלא -->
+      <div class="hero-top-half-section">
+        <div class="container hero-container">
+          <div class="hero-page-top reveal-on-scroll">
+            
+            <div class="hero-badge removable-element movable-element hero-text-badge" data-movable-id="hero_badge_box">
+              <span class="hero-tagline-faded" data-edit-key="hero_badge_text">דיוק • איכות • סטייל</span>
+              <button type="button" class="btn-delete-element" title="מחק תגית זו"><i data-lucide="x"></i></button>
+            </div>
+
+            <div class="hero-logo-large placeholder-box movable-element" id="heroLogo" data-movable-id="hero_logo_box" data-editable-image="hero_logo" title="לחץ להעלאת לוגו גדול">
+              <div class="logo-placeholder-content">
+                <i data-lucide="crown" class="hero-default-icon"></i>
+                <span class="placeholder-tag">[מקום ללוגו ראשי]</span>
+              </div>
+              <img src="" alt="לוגו ראשי" class="uploaded-img" style="display: none;">
+              <button type="button" class="btn-remove-image" data-remove-image="hero_logo" title="הסר לוגו ראשי">
+                <i data-lucide="x"></i>
+              </button>
+            </div>
+
+            <div class="hero-brand-highlight movable-element" data-movable-id="hero_brand_title">
+              <h1 class="hero-title hero-brand-main-title" data-edit-key="hero_brand_name">מספרת אלמנט</h1>
+              <p class="hero-subtitle" data-edit-key="hero_subtitle">
+                התספורת שלך, הסטייל שלך. חוויית גזירה וגילוח מקצועית באווירה מוקפדת ומינימליסטית.
+              </p>
+            </div>
+
+            <div class="hero-buttons movable-element" data-movable-id="hero_buttons_group">
+              <a href="https://app.boka.co.il/join/kRnQ12Otkly9xEIthPmL" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-large open-booking-btn">
+                <i data-lucide="calendar-check"></i>
+                <span data-edit-key="hero_btn_book">לקביעת תורים</span>
+              </a>
+              <a href="tel:0585681064" class="btn btn-outline btn-large removable-element hero-phone-btn" data-removable-id="hero_btn_services" id="heroPhoneBtn" title="חיוג ישיר: 058-568-1064">
+                <i data-lucide="phone-call"></i>
+                <span data-edit-key="hero_btn_phone">לטלפון</span>
+                <button type="button" class="btn-delete-element" title="מחק כפתור זה"><i data-lucide="x"></i></button>
+              </a>
+            </div>
+
+            <!-- Highlights Strip with Delete & Add options -->
+            <div class="hero-highlights-strip movable-element" id="heroHighlights" data-movable-id="hero_highlights_group">
+              <div class="highlight-item draggable-highlight" data-highlight-id="h1">
+                <i data-lucide="scissors"></i>
+                <span data-edit-key="hero_feature_1">עיצוב שיער וזקן מותאם אישית</span>
+                <button type="button" class="btn-item-delete" title="מחק יתרון זה"><i data-lucide="x"></i></button>
+              </div>
+              <div class="highlight-divider"></div>
+              <div class="highlight-item draggable-highlight" data-highlight-id="h2">
+                <i data-lucide="map-pin"></i>
+                <span data-edit-key="hero_feature_2">יוסי בנאי 44</span>
+                <button type="button" class="btn-item-delete" title="מחק יתרון זה"><i data-lucide="x"></i></button>
+              </div>
+              <div class="highlight-divider"></div>
+              <div class="highlight-item draggable-highlight highlight-item-multiline" data-highlight-id="h3">
+                <i data-lucide="clock"></i>
+                <div class="highlight-hours-wrap" data-edit-key="hero_feature_3">
+                  <span>ראשון עד חמישי 8:00-22:00</span>
+                  <span>שישי 8:00-13:00</span>
+                </div>
+                <button type="button" class="btn-item-delete" title="מחק יתרון זה"><i data-lucide="x"></i></button>
+              </div>
+            </div>
+
+            <div class="add-highlight-wrap">
+              <button type="button" class="btn-add-mini" id="addHighlightBtn">
+                <i data-lucide="plus"></i>
+                <span>הוסף פריט לשורת היתרונות</span>
+              </button>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- עמוד תחתון: עמוד התמונות - צבע שחור מלא עם קו מפריד באמצע -->
+      <div class="hero-bottom-half-section">
+        <div class="container hero-container">
+          
+          <div class="hero-page-bottom movable-element" data-movable-id="hero_page_bottom">
+            <div class="hero-custom-gallery-grid">
+              
+              <!-- חריץ תמונה 1 -->
+              <div class="custom-hero-photo-box placeholder-box reveal-on-scroll delay-100" data-editable-image="hero_custom_img_1" title="לחץ להעלאת תמונה 1">
+                <div class="photo-placeholder-content">
+                  <div class="photo-icon-circle">
+                    <i data-lucide="image-plus" class="custom-photo-icon"></i>
+                  </div>
+                  <span class="custom-photo-title">תמונה 1</span>
+                  <span class="custom-photo-sub">לחץ לבחירת תמונה</span>
+                </div>
+                <img src="" alt="תמונה 1" class="uploaded-img" style="display: none;">
+                <button type="button" class="btn-remove-image" data-remove-image="hero_custom_img_1" title="הסר תמונה 1">
+                  <i data-lucide="x"></i>
+                </button>
+              </div>
+
+              <!-- חריץ תמונה 2 -->
+              <div class="custom-hero-photo-box placeholder-box reveal-on-scroll delay-200" data-editable-image="hero_custom_img_2" title="לחץ להעלאת תמונה 2">
+                <div class="photo-placeholder-content">
+                  <div class="photo-icon-circle">
+                    <i data-lucide="image-plus" class="custom-photo-icon"></i>
+                  </div>
+                  <span class="custom-photo-title">תמונה 2</span>
+                  <span class="custom-photo-sub">לחץ לבחירת תמונה</span>
+                </div>
+                <img src="" alt="תמונה 2" class="uploaded-img" style="display: none;">
+                <button type="button" class="btn-remove-image" data-remove-image="hero_custom_img_2" title="הסר תמונה 2">
+                  <i data-lucide="x"></i>
+                </button>
+              </div>
+
+              <!-- חריץ תמונה 3 -->
+              <div class="custom-hero-photo-box placeholder-box reveal-on-scroll delay-300" data-editable-image="hero_custom_img_3" title="לחץ להעלאת תמונה 3">
+                <div class="photo-placeholder-content">
+                  <div class="photo-icon-circle">
+                    <i data-lucide="image-plus" class="custom-photo-icon"></i>
+                  </div>
+                  <span class="custom-photo-title">תמונה 3</span>
+                  <span class="custom-photo-sub">לחץ לבחירת תמונה</span>
+                </div>
+                <img src="" alt="תמונה 3" class="uploaded-img" style="display: none;">
+                <button type="button" class="btn-remove-image" data-remove-image="hero_custom_img_3" title="הסר תמונה 3">
+                  <i data-lucide="x"></i>
+                </button>
+              </div>
+
+              <!-- חריץ תמונה 4 -->
+              <div class="custom-hero-photo-box placeholder-box reveal-on-scroll delay-400" data-editable-image="hero_custom_img_4" title="לחץ להעלאת תמונה 4">
+                <div class="photo-placeholder-content">
+                  <div class="photo-icon-circle">
+                    <i data-lucide="image-plus" class="custom-photo-icon"></i>
+                  </div>
+                  <span class="custom-photo-title">תמונה 4</span>
+                  <span class="custom-photo-sub">לחץ לבחירת תמונה</span>
+                </div>
+                <img src="" alt="תמונה 4" class="uploaded-img" style="display: none;">
+                <button type="button" class="btn-remove-image" data-remove-image="hero_custom_img_4" title="הסר תמונה 4">
+                  <i data-lucide="x"></i>
+                </button>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- Services Section -->
+    <section class="section services-section draggable-section" id="services" data-section-id="services" data-section-title="שירותים ומחירים">
+      
+      <!-- Section Controls -->
+      <div class="edit-section-bar">
+        <div class="section-drag-handle" title="גרור כדי להזיז מקטע">
+          <i data-lucide="grip-vertical"></i>
+          <span class="section-badge-name">מקטע: שירותים ומחירים</span>
+        </div>
+        <div class="section-move-btns">
+          <button type="button" class="btn-sec-move" data-move-sec="up" title="הזז מקטע זה למעלה">
+            <i data-lucide="arrow-up"></i>
+            <span>למעלה</span>
+          </button>
+          <button type="button" class="btn-sec-move" data-move-sec="down" title="הזז מקטע זה למטה">
+            <i data-lucide="arrow-down"></i>
+            <span>למטה</span>
+          </button>
+          <button type="button" class="btn-sec-delete" title="מחק את כל מקטע השירותים">
+            <i data-lucide="trash-2"></i>
+            <span>מחק מקטע</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="container">
+        
+        <div class="section-header reveal-on-scroll">
+          <h2 class="section-title" data-edit-key="services_title">שירותים ומחירים</h2>
+        </div>
+
+        <!-- Animated Stats Counter Bar -->
+        <div class="stats-counter-bar reveal-on-scroll">
+          <div class="stat-counter-item">
+            <div class="stat-num-wrap">
+              <span class="stat-counter" data-target="100">0</span>
+              <span class="stat-suffix">%</span>
+            </div>
+            <span class="stat-label">דיוק ואיכות מובטחת</span>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-counter-item">
+            <div class="stat-num-wrap">
+              <span class="stat-prefix">+</span>
+              <span class="stat-counter" data-target="5000">0</span>
+            </div>
+            <span class="stat-label">לקוחות מרוצים</span>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-counter-item">
+            <div class="stat-num-wrap">
+              <span class="stat-prefix">+</span>
+              <span class="stat-counter" data-target="8">0</span>
+            </div>
+            <span class="stat-label">שנות ניסיון ומומחיות</span>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-counter-item">
+            <div class="stat-num-wrap">
+              <span class="stat-counter" data-target="5">0</span>
+              <span class="stat-suffix">.0 ★</span>
+            </div>
+            <span class="stat-label">דירוג שירות מושלם</span>
+          </div>
+        </div>
+
+        <div class="services-grid" id="servicesGrid">
+          
+          <!-- Service Card 1 -->
+          <div class="service-card draggable-card" data-card-id="service_1">
+            <div class="edit-card-bar">
+              <div class="card-drag-handle" title="גרור כדי להזיז מקום">
+                <i data-lucide="grip-vertical"></i>
+                <span>הזז</span>
+              </div>
+              <div class="card-move-actions">
+                <button type="button" class="btn-card-move" data-card-move="prev" title="הזז כרטיס ימינה">
+                  <i data-lucide="chevron-right"></i>
+                </button>
+                <button type="button" class="btn-card-move" data-card-move="next" title="הזז כרטיס שמאלה">
+                  <i data-lucide="chevron-left"></i>
+                </button>
+                <button type="button" class="btn-card-delete" title="מחק שירות זה">
+                  <i data-lucide="trash-2"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="service-card-glow"></div>
+            <div class="service-card-top">
+              <div class="service-icon-wrap">
+                <i data-lucide="user"></i>
+              </div>
+            </div>
+            <h3 class="service-name" data-edit-key="service_1_title">תספורת לנער</h3>
+            <div class="service-pricing">
+              <span class="currency">₪</span>
+              <span class="price-val" data-edit-key="service_1_price">60</span>
+            </div>
+            <a href="https://app.boka.co.il/join/kRnQ12Otkly9xEIthPmL" target="_blank" rel="noopener noreferrer" class="btn btn-card-book">
+              <span>הזמן תור עכשיו</span>
+              <i data-lucide="arrow-left"></i>
+            </a>
+          </div>
+
+          <!-- Service Card 2 (Featured) -->
+          <div class="service-card featured draggable-card" data-card-id="service_2">
+            <div class="edit-card-bar">
+              <div class="card-drag-handle" title="גרור כדי להזיז מקום">
+                <i data-lucide="grip-vertical"></i>
+                <span>הזז</span>
+              </div>
+              <div class="card-move-actions">
+                <button type="button" class="btn-card-move" data-card-move="prev" title="הזז כרטיס ימינה">
+                  <i data-lucide="chevron-right"></i>
+                </button>
+                <button type="button" class="btn-card-move" data-card-move="next" title="הזז כרטיס שמאלה">
+                  <i data-lucide="chevron-left"></i>
+                </button>
+                <button type="button" class="btn-card-delete" title="מחק שירות זה">
+                  <i data-lucide="trash-2"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="service-card-glow"></div>
+            <div class="service-card-top">
+              <div class="service-icon-wrap">
+                <i data-lucide="sparkles"></i>
+              </div>
+            </div>
+            <h3 class="service-name" data-edit-key="service_2_title">תספורת לגבר</h3>
+            <div class="service-pricing">
+              <span class="currency">₪</span>
+              <span class="price-val" data-edit-key="service_2_price">70</span>
+            </div>
+            <a href="https://app.boka.co.il/join/kRnQ12Otkly9xEIthPmL" target="_blank" rel="noopener noreferrer" class="btn btn-card-book">
+              <span>הזמן תור עכשיו</span>
+              <i data-lucide="arrow-left"></i>
+            </a>
+          </div>
+
+          <!-- Service Card 3 -->
+          <div class="service-card draggable-card" data-card-id="service_3">
+            <div class="edit-card-bar">
+              <div class="card-drag-handle" title="גרור כדי להזיז מקום">
+                <i data-lucide="grip-vertical"></i>
+                <span>הזז</span>
+              </div>
+              <div class="card-move-actions">
+                <button type="button" class="btn-card-move" data-card-move="prev" title="הזז כרטיס ימינה">
+                  <i data-lucide="chevron-right"></i>
+                </button>
+                <button type="button" class="btn-card-move" data-card-move="next" title="הזז כרטיס שמאלה">
+                  <i data-lucide="chevron-left"></i>
+                </button>
+                <button type="button" class="btn-card-delete" title="מחק שירות זה">
+                  <i data-lucide="trash-2"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="service-card-glow"></div>
+            <div class="service-card-top">
+              <div class="service-icon-wrap">
+                <i data-lucide="shield-check"></i>
+              </div>
+            </div>
+            <h3 class="service-name" data-edit-key="service_3_title">תספורת + זקן</h3>
+            <div class="service-pricing">
+              <span class="currency">₪</span>
+              <span class="price-val" data-edit-key="service_3_price">80</span>
+            </div>
+            <a href="https://app.boka.co.il/join/kRnQ12Otkly9xEIthPmL" target="_blank" rel="noopener noreferrer" class="btn btn-card-book">
+              <span>הזמן תור עכשיו</span>
+              <i data-lucide="arrow-left"></i>
+            </a>
+          </div>
+
+        </div>
+
+        <!-- Add Service Button (Visible in Edit Mode) -->
+        <div class="add-card-container">
+          <button type="button" class="btn-add-item" id="addServiceBtn">
+            <i data-lucide="plus-circle"></i>
+            <span>הוסף שירות חדש למחירון</span>
+          </button>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Team Section -->
+    <section class="section team-section draggable-section" id="team" data-section-id="team" data-section-title="הצוות שלנו">
+      
+      <!-- Section Controls -->
+      <div class="edit-section-bar">
+        <div class="section-drag-handle" title="גרור כדי להזיז מקטע">
+          <i data-lucide="grip-vertical"></i>
+          <span class="section-badge-name">מקטע: הצוות שלנו</span>
+        </div>
+        <div class="section-move-btns">
+          <button type="button" class="btn-sec-move" data-move-sec="up" title="הזז מקטע זה למעלה">
+            <i data-lucide="arrow-up"></i>
+            <span>למעלה</span>
+          </button>
+          <button type="button" class="btn-sec-move" data-move-sec="down" title="הזז מקטע זה למטה">
+            <i data-lucide="arrow-down"></i>
+            <span>למטה</span>
+          </button>
+          <button type="button" class="btn-sec-delete" title="מחק את כל מקטע הצוות">
+            <i data-lucide="trash-2"></i>
+            <span>מחק מקטע</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="container">
+        
+        <div class="section-header">
+          <h2 class="section-title" data-edit-key="team_title">הצוות שלנו</h2>
+          <p class="section-description" data-edit-key="team_desc">
+            שלושה ספרים נבחרים, שנוצרו בקפידה ומביאים איתם סיפור, אופי ונוכחות ייחודית.
+          </p>
+        </div>
+
+        <!-- Team Grid -->
+        <div class="team-grid" id="teamGrid">
+          
+          <!-- Team Member 1 -->
+          <div class="team-card draggable-card" data-card-id="team_1">
+            <div class="edit-card-bar">
+              <div class="card-drag-handle" title="גרור כדי להזיז מקום">
+                <i data-lucide="grip-vertical"></i>
+                <span>הזז</span>
+              </div>
+              <div class="card-move-actions">
+                <button type="button" class="btn-card-move" data-card-move="prev" title="הזז ספר ימינה">
+                  <i data-lucide="chevron-right"></i>
+                </button>
+                <button type="button" class="btn-card-move" data-card-move="next" title="הזז ספר שמאלה">
+                  <i data-lucide="chevron-left"></i>
+                </button>
+                <button type="button" class="btn-card-delete" title="מחק איש צוות זה">
+                  <i data-lucide="trash-2"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="team-photo-wrap placeholder-box" id="teamImg1" data-editable-image="team_1_photo" title="לחץ להעלאת תמונת ספר">
+              <div class="photo-placeholder-content">
+                <i data-lucide="user" class="member-default-icon"></i>
+                <span class="placeholder-tag">[הוסף תמונה]</span>
+              </div>
+              <img src="" alt="תמונת ספר" class="uploaded-img" style="display: none;">
+              <button type="button" class="btn-remove-image" data-remove-image="team_1_photo" title="הסר תמונה">
+                <i data-lucide="x"></i>
+              </button>
+            </div>
+            <div class="team-content">
+              <div class="team-header-info">
+                <h3 class="team-name placeholder-text" data-edit-key="team_1_name">[שם הספר]</h3>
+                <span class="team-role placeholder-text" data-edit-key="team_1_role">[תפקיד / התמחות]</span>
+              </div>
+              <p class="team-bio placeholder-text" data-edit-key="team_1_bio">
+                [כאן ניתן לכתוב ביוגרפיה קצרה, שנות ניסיון והתמחות מיוחדת בתספורות ועיצוב זקן]
+              </p>
+              <a href="https://app.boka.co.il/join/kRnQ12Otkly9xEIthPmL" target="_blank" rel="noopener noreferrer" class="btn btn-outline btn-sm open-booking-btn">
+                <i data-lucide="calendar"></i>
+                <span>קבע תור</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- Team Member 2 -->
+          <div class="team-card draggable-card" data-card-id="team_2">
+            <div class="edit-card-bar">
+              <div class="card-drag-handle" title="גרור כדי להזיז מקום">
+                <i data-lucide="grip-vertical"></i>
+                <span>הזז</span>
+              </div>
+              <div class="card-move-actions">
+                <button type="button" class="btn-card-move" data-card-move="prev" title="הזז ספר ימינה">
+                  <i data-lucide="chevron-right"></i>
+                </button>
+                <button type="button" class="btn-card-move" data-card-move="next" title="הזז ספר שמאלה">
+                  <i data-lucide="chevron-left"></i>
+                </button>
+                <button type="button" class="btn-card-delete" title="מחק איש צוות זה">
+                  <i data-lucide="trash-2"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="team-photo-wrap placeholder-box" id="teamImg2" data-editable-image="team_2_photo" title="לחץ להעלאת תמונת ספר">
+              <div class="photo-placeholder-content">
+                <i data-lucide="user" class="member-default-icon"></i>
+                <span class="placeholder-tag">[הוסף תמונה]</span>
+              </div>
+              <img src="" alt="תמונת ספר" class="uploaded-img" style="display: none;">
+              <button type="button" class="btn-remove-image" data-remove-image="team_2_photo" title="הסר תמונה">
+                <i data-lucide="x"></i>
+              </button>
+            </div>
+            <div class="team-content">
+              <div class="team-header-info">
+                <h3 class="team-name placeholder-text" data-edit-key="team_2_name">[שם הספר]</h3>
+                <span class="team-role placeholder-text" data-edit-key="team_2_role">[תפקיד / התמחות]</span>
+              </div>
+              <p class="team-bio placeholder-text" data-edit-key="team_2_bio">
+                [כאן ניתן לכתוב ביוגרפיה קצרה, שנות ניסיון והתמחות מיוחדת בתספורות ועיצוב זקן]
+              </p>
+              <a href="https://app.boka.co.il/join/kRnQ12Otkly9xEIthPmL" target="_blank" rel="noopener noreferrer" class="btn btn-outline btn-sm open-booking-btn">
+                <i data-lucide="calendar"></i>
+                <span>קבע תור</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- Team Member 3 -->
+          <div class="team-card draggable-card" data-card-id="team_3">
+            <div class="edit-card-bar">
+              <div class="card-drag-handle" title="גרור כדי להזיז מקום">
+                <i data-lucide="grip-vertical"></i>
+                <span>הזז</span>
+              </div>
+              <div class="card-move-actions">
+                <button type="button" class="btn-card-move" data-card-move="prev" title="הזז ספר ימינה">
+                  <i data-lucide="chevron-right"></i>
+                </button>
+                <button type="button" class="btn-card-move" data-card-move="next" title="הזז ספר שמאלה">
+                  <i data-lucide="chevron-left"></i>
+                </button>
+                <button type="button" class="btn-card-delete" title="מחק איש צוות זה">
+                  <i data-lucide="trash-2"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="team-photo-wrap placeholder-box" id="teamImg3" data-editable-image="team_3_photo" title="לחץ להעלאת תמונת ספר">
+              <div class="photo-placeholder-content">
+                <i data-lucide="user" class="member-default-icon"></i>
+                <span class="placeholder-tag">[הוסף תמונה]</span>
+              </div>
+              <img src="" alt="תמונת ספר" class="uploaded-img" style="display: none;">
+              <button type="button" class="btn-remove-image" data-remove-image="team_3_photo" title="הסר תמונה">
+                <i data-lucide="x"></i>
+              </button>
+            </div>
+            <div class="team-content">
+              <div class="team-header-info">
+                <h3 class="team-name placeholder-text" data-edit-key="team_3_name">[שם הספר]</h3>
+                <span class="team-role placeholder-text" data-edit-key="team_3_role">[תפקיד / התמחות]</span>
+              </div>
+              <p class="team-bio placeholder-text" data-edit-key="team_3_bio">
+                [כאן ניתן לכתוב ביוגרפיה קצרה, שנות ניסיון והתמחות מיוחדת בתספורות ועיצוב זקן]
+              </p>
+              <a href="https://app.boka.co.il/join/kRnQ12Otkly9xEIthPmL" target="_blank" rel="noopener noreferrer" class="btn btn-outline btn-sm open-booking-btn">
+                <i data-lucide="calendar"></i>
+                <span>קבע תור</span>
+              </a>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Add Team Member Button (Visible in Edit Mode) -->
+        <div class="add-card-container">
+          <button type="button" class="btn-add-item" id="addTeamBtn">
+            <i data-lucide="user-plus"></i>
+            <span>הוסף איש צוות חדש</span>
+          </button>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Location & Opening Hours Section -->
+    <section class="section location-section draggable-section" id="location" data-section-id="location" data-section-title="מיקום ושעות פתיחה">
+      
+      <!-- Section Controls -->
+      <div class="edit-section-bar">
+        <div class="section-drag-handle" title="גרור כדי להזיז מקטע">
+          <i data-lucide="grip-vertical"></i>
+          <span class="section-badge-name">מקטע: מיקום ושעות פתיחה</span>
+        </div>
+        <div class="section-move-btns">
+          <button type="button" class="btn-sec-move" data-move-sec="up" title="הזז מקטע זה למעלה">
+            <i data-lucide="arrow-up"></i>
+            <span>למעלה</span>
+          </button>
+          <button type="button" class="btn-sec-move" data-move-sec="down" title="הזז מקטע זה למטה">
+            <i data-lucide="arrow-down"></i>
+            <span>למטה</span>
+          </button>
+          <button type="button" class="btn-sec-delete" title="מחק את כל מקטע המיקום והשעות">
+            <i data-lucide="trash-2"></i>
+            <span>מחק מקטע</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="container">
+        
+        <div class="section-header">
+          <h2 class="section-title" data-edit-key="location_title">מיקום ושעות פתיחה</h2>
+          <p class="section-description" data-edit-key="location_desc">
+            אנחנו מחכים לכם במיקום נגיש ונוח. מומלץ לתאם תור מראש כדי להבטיח את זמנכם.
+          </p>
+        </div>
+
+        <div class="location-grid">
+          
+          <!-- Details Card -->
+          <div class="location-card">
+            
+            <!-- Address Block -->
+            <div class="info-block draggable-info-block removable-element" data-info-id="address_block">
+              <div class="info-icon">
+                <i data-lucide="map-pin"></i>
+              </div>
+              <div class="info-content">
+                <h4 class="info-title">כתובת המספרה</h4>
+                <p class="info-value address-highlight" data-edit-key="location_address">יוסי בנאי 44</p>
+                <span class="info-sub" data-edit-key="location_sub">חניה נוחה בסמוך למקום וגישה נגישה</span>
+              </div>
+              <button type="button" class="btn-item-delete" title="מחק בלוק כתובת"><i data-lucide="x"></i></button>
+            </div>
+
+            <!-- Opening Hours Block -->
+            <div class="info-block draggable-info-block removable-element" data-info-id="hours_block">
+              <div class="info-icon">
+                <i data-lucide="clock"></i>
+              </div>
+              <div class="info-content hours-wrapper">
+                <h4 class="info-title">שעות פעילות</h4>
+                
+                <div class="hours-list" id="hoursList">
+                  <div class="hours-row" data-hour-row="1">
+                    <span class="day-label" data-edit-key="hours_weekday_label">ראשון עד חמישי:</span>
+                    <span class="day-hours" data-edit-key="hours_weekday_val">8:00 – 22:00</span>
+                    <button type="button" class="btn-hour-delete" title="מחק שורה זו"><i data-lucide="x"></i></button>
+                  </div>
+                  <div class="hours-row" data-hour-row="2">
+                    <span class="day-label" data-edit-key="hours_friday_label">שישי:</span>
+                    <span class="day-hours" data-edit-key="hours_friday_val">8:00 – 13:00</span>
+                    <button type="button" class="btn-hour-delete" title="מחק שורה זו"><i data-lucide="x"></i></button>
+                  </div>
+                  <div class="hours-row closed" data-hour-row="3">
+                    <span class="day-label" data-edit-key="hours_saturday_label">שבת:</span>
+                    <span class="day-hours" data-edit-key="hours_saturday_val">סגור</span>
+                    <button type="button" class="btn-hour-delete" title="מחק שורה זו"><i data-lucide="x"></i></button>
+                  </div>
+                </div>
+
+                <div class="add-hour-wrap">
+                  <button type="button" class="btn-add-mini" id="addHourRowBtn">
+                    <i data-lucide="plus"></i>
+                    <span>הוסף שורת שעות</span>
+                  </button>
+                </div>
+
+                <div class="hours-status-badge" id="openingStatusBadge">
+                  <span class="status-indicator"></span>
+                  <span id="openingStatusText">בודק סטטוס פתיחה...</span>
+                </div>
+              </div>
+              <button type="button" class="btn-item-delete" title="מחק בלוק שעות"><i data-lucide="x"></i></button>
+            </div>
+
+          </div>
+
+          <!-- Google Maps Card -->
+          <div class="map-card removable-element" data-removable-id="map_card_box">
+            <div class="map-visual google-map-visual">
+              <iframe
+                title="מפת גוגל - מספרת אלמנט, יוסי בנאי 44"
+                class="google-map-iframe"
+                src="https://maps.google.com/maps?q=%D7%99%D7%95%D7%A1%D7%99%20%D7%91%D7%A0%D7%90%D7%99%2044&t=&z=16&ie=UTF8&iwloc=&output=embed"
+                width="100%"
+                height="100%"
+                style="border:0;"
+                allowfullscreen=""
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade">
+              </iframe>
+              <button type="button" class="btn-card-delete-corner" title="מחק מפה זו">
+                <i data-lucide="trash-2"></i>
+              </button>
+            </div>
+            <div class="map-card-footer">
+              <div class="map-footer-text">
+                <span class="map-city-title">יוסי בנאי 44</span>
+                <span class="map-city-sub">מספרת אלמנט • פתח מסלול הגעה בגוגל מפות</span>
+              </div>
+              <a href="https://maps.google.com/?q=%D7%99%D7%95%D7%A1%D7%99%20%D7%91%D7%A0%D7%90%D7%99%2044" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm gmaps-btn">
+                <i data-lucide="map-pin"></i>
+                <span>פתח ב-Google Maps</span>
+                <i data-lucide="external-link"></i>
+              </a>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <!-- Restore Deleted Items Modal (סל שחזור) -->
+  <div class="modal-overlay" id="restoreModal" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <i data-lucide="archive-restore" class="modal-header-icon"></i>
+          <div>
+            <h3 class="modal-title">סל שחזור פריטים</h3>
+            <p class="modal-subtitle">כל הפריטים, הכרטיסים והמקטעים שמחקת ניתנים לשחזור בלחיצה אחת</p>
+          </div>
+        </div>
+        <button class="modal-close-btn" onclick="closeRestoreModal()" aria-label="סגור חלון">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+
+      <div class="modal-body restore-modal-body">
+        <div class="restore-list" id="restoreList">
+          <!-- Populated dynamically -->
+        </div>
+        <div class="restore-empty-state" id="restoreEmptyState" style="display: none;">
+          <i data-lucide="check-circle" class="empty-icon"></i>
+          <p>סל השחזור ריק. שום דבר לא נמחק כרגע!</p>
+        </div>
+      </div>
+
+      <div class="modal-footer restore-footer">
+        <button type="button" class="btn btn-outline btn-sm" onclick="restoreAllDeleted()">
+          <i data-lucide="rotate-ccw"></i>
+          <span>שחזר הכל בבת אחת</span>
+        </button>
+        <button type="button" class="btn btn-primary btn-sm" onclick="closeRestoreModal()">
+          <span>סגור</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container footer-container">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <div class="footer-logo placeholder-box" id="footerLogo" data-editable-image="footer_logo" title="לחץ להעלאת לוגו">
+            <div class="logo-placeholder-content">
+              <i data-lucide="scissors"></i>
+            </div>
+            <img src="" alt="לוגו" class="uploaded-img" style="display: none;">
+            <button type="button" class="btn-remove-image" data-remove-image="footer_logo" title="הסר לוגו">
+              <i data-lucide="x"></i>
+            </button>
+          </div>
+          <div class="footer-brand-info">
+            <span class="footer-brand-name" data-edit-key="brand_name_footer">מספרת אלמנט</span>
+            <span class="footer-tagline" data-edit-key="brand_tagline_footer">התספורת שלך, הסטייל שלך</span>
+          </div>
+        </div>
+
+        <ul class="footer-links">
+          <li><a href="#hero">בית</a></li>
+          <li><a href="#services">שירותים ומחירים</a></li>
+          <li><a href="#team">הצוות שלנו</a></li>
+          <li><a href="#location">מיקום ושעות</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-bottom">
+        <p class="copyright" data-edit-key="footer_copyright">
+          © <span id="currentYear"></span> מספרת אלמנט | יוסי בנאי 44 | כל הזכויות שמורות.
+        </p>
+        </div>
+    </div>
+  </footer>
+
+  <!-- Floating Booking & WhatsApp Quick Buttons -->
+  <div class="floating-quick-actions">
+    <a href="https://app.boka.co.il/join/kRnQ12Otkly9xEIthPmL" target="_blank" rel="noopener noreferrer" class="floating-btn booking-float-btn open-booking-btn" title="לקביעת תור ב-Boka">
+      <i data-lucide="calendar"></i>
+      <span class="float-tooltip">קביעת תור</span>
+    </a>
+    <a href="https://wa.me/972585681064?text=%D7%A9%D7%9C%D7%95%D7%9D%2C%20%D7%90%D7%A0%D7%99%20%D7%9E%D7%A2%D7%95%D7%A0%D7%99%D7%99%D7%9F%20%D7%9C%D7%A7%D7%91%D7%95%D7%A2%20%D7%AA%D7%95%D7%A8%20%D7%91%D7%9E%D7%A1%D7%A4%D7%A8%D7%AA%20%D7%90%D7%9C%D7%9E%D7%A0%D7%98" target="_blank" rel="noopener noreferrer" class="floating-btn whatsapp-float-btn" title="שליחת הודעת וואטסאפ ל-058-568-1064">
+      <i data-lucide="message-circle"></i>
+      <span class="float-tooltip">וואטסאפ</span>
+    </a>
+  </div>
+
+  <!-- Booking Modal -->
+  <div class="modal-overlay" id="bookingModal" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <i data-lucide="calendar-check" class="modal-header-icon"></i>
+          <div>
+            <h3 class="modal-title">לקביעת תור</h3>
+            <p class="modal-subtitle">מספרת אלמנט • יוסי בנאי 44</p>
+          </div>
+        </div>
+        <button class="modal-close-btn" onclick="closeBookingModal()" aria-label="סגור חלון">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+
+      <form id="bookingForm" class="modal-form" onsubmit="handleBookingSubmit(event)">
+        
+        <!-- Service Selection -->
+        <div class="form-group">
+          <label class="form-label" for="bookingService">בחר שירות</label>
+          <div class="select-wrapper">
+            <select id="bookingService" class="form-control" required>
+              <option value="" disabled selected>בחר מהרשימה...</option>
+              <option value="תספורת לנער (60 ₪)">תספורת לנער — 60 ₪</option>
+              <option value="תספורת לגבר (70 ₪)">תספורת לגבר — 70 ₪</option>
+              <option value="תספורת + זקן (80 ₪)">תספורת + זקן — 80 ₪</option>
+            </select>
+            <i data-lucide="chevron-down" class="select-icon"></i>
+          </div>
+        </div>
+
+        <!-- Barber Selection (Optional) -->
+        <div class="form-group">
+          <label class="form-label" for="bookingBarber">בחר ספר (אופציונלי)</label>
+          <div class="select-wrapper">
+            <select id="bookingBarber" class="form-control">
+              <option value="ספר פנוי ראשון">כל ספר פנוי</option>
+              <option value="ספר 1">ספר 1</option>
+              <option value="ספר 2">ספר 2</option>
+              <option value="ספר 3">ספר 3</option>
+            </select>
+            <i data-lucide="chevron-down" class="select-icon"></i>
+          </div>
+        </div>
+
+        <!-- Date & Time Row -->
+        <div class="form-row">
+          <div class="form-group col-half">
+            <label class="form-label" for="bookingDate">תאריך מבוקש</label>
+            <input type="date" id="bookingDate" class="form-control" required>
+          </div>
+          <div class="form-group col-half">
+            <label class="form-label" for="bookingTime">שעה מבוקשת</label>
+            <input type="time" id="bookingTime" class="form-control" min="08:00" max="22:00" required>
+          </div>
+        </div>
+
+        <!-- Name & Phone -->
+        <div class="form-group">
+          <label class="form-label" for="bookingName">שם מלא</label>
+          <input type="text" id="bookingName" class="form-control" placeholder="לדוגמה: ישראל ישראלי" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="bookingPhone">מספר טלפון / נייד</label>
+          <input type="tel" id="bookingPhone" class="form-control" placeholder="050-0000000" dir="ltr" style="text-align: right;" required>
+        </div>
+
+        <!-- Notes -->
+        <div class="form-group">
+          <label class="form-label" for="bookingNotes">הערות נוספות (אופציונלי)</label>
+          <textarea id="bookingNotes" class="form-control" rows="2" placeholder="בקשות מיוחדות, העדפות וכו'"></textarea>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary btn-block btn-large">
+            <i data-lucide="check-circle"></i>
+            <span>אישור ושליחה בוואטסאפ</span>
+          </button>
+          <p class="modal-notice">ההזמנה תועבר ישירות לוואטסאפ של המספרה לאישור סופי.</p>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <!-- Floating Action Hub (WhatsApp + Back to Top) -->
+  <div class="floating-action-hub">
+    <a href="https://wa.me/972585681064?text=%D7%94%D7%99%D7%99%2C%20%D7%90%D7%A9%D7%9E%D7%97%20%D7%9C%D7%A4%D7%A8%D7%98%D7%99%D7%9D%20%D7%95%D7%AA%D7%90%D7%95%D7%9D%20%D7%AA%D7%95%D7%A8%20%D7%91%D7%9E%D7%A1%D7%A4%D7%A8%D7%AA%20%D7%90%D7%9C%D7%9E%D7%A0%D7%98" target="_blank" rel="noopener noreferrer" class="floating-btn floating-wa-btn" title="וואטסאפ: 058-568-1064">
+      <i data-lucide="message-circle"></i>
+      <span class="floating-btn-tooltip">וואטסאפ ישיר</span>
+    </a>
+    <button type="button" class="floating-btn floating-top-btn" id="backToTopBtn" title="חזרה לראש העמוד">
+      <i data-lucide="arrow-up"></i>
+      <span class="floating-btn-tooltip">למעלה</span>
+    </button>
+  </div>
+
+  <!-- Image Lightbox Modal for High-Res Fullscreen View -->
+  <div class="lightbox-modal" id="imageLightboxModal">
+    <div class="lightbox-backdrop" id="lightboxBackdrop"></div>
+    <div class="lightbox-dialog">
+      <button type="button" class="lightbox-close-btn" id="lightboxCloseBtn" title="סגור תצוגה">
+        <i data-lucide="x"></i>
+      </button>
+      <img src="" alt="תצוגת תמונה מוגדלת" class="lightbox-img" id="lightboxImg">
+      <div class="lightbox-caption" id="lightboxCaption"></div>
+    </div>
+  </div>
+
+  <!-- Image Upload Hidden Input for live image replacements -->
+  <input type="file" id="globalImageUploader" accept="image/*" style="display: none;">
+
+  <!-- Scripts -->
+  <script src="app.js"></script>
+  <script>
+    // Initialize Lucide icons
+    lucide.createIcons();
+  </script>
+</body>
+</html>
